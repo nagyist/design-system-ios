@@ -26,21 +26,6 @@ var CONFIG = {
 
 };
 
-var forceBaseAliases = require('./build/force-base/aliases')(CONFIG);
-var forceBaseBackgrounds = require('./build/force-base/background')(CONFIG);
-var forceBaseText = require('./build/force-base/text')(CONFIG);
-var forceBaseBorder = require('./build/force-base/border')(CONFIG);
-var forceBaseButton = require('./build/force-base/button')(CONFIG);
-var forceBaseInput = require('./build/force-base/input')(CONFIG);
-var forceBaseMessaging = require('./build/force-base/messaging')(CONFIG);
-
-var forceBaseSpacing = require('./build/force-base/spacing')(CONFIG);
-var forceBaseSizing = require('./build/force-base/sizing')(CONFIG);
-var forceBaseLineHeight = require('./build/force-base/lineHeight')(CONFIG);
-
-
-var fonts = require('./build/force-base/fonts')(CONFIG);
-
 var iconsUtility = require('./build/icons/icons-utility')(CONFIG);
 var iconsAction = require('./build/icons/icons-actions')(CONFIG);
 var iconsCustom = require('./build/icons/icons-custom')(CONFIG);
@@ -50,15 +35,6 @@ var iconsLabelsUtility = require('./build/icons/icons-labels-utility')(CONFIG);
 var iconsLabelsAction = require('./build/icons/icons-labels-actions')(CONFIG);
 var iconsLabelsCustom = require('./build/icons/icons-labels-custom')(CONFIG);
 var iconsLabelsStandard = require('./build/icons/icons-labels-standard')(CONFIG);
-
-
-var cleanup = function(opts){
-  var deferred = Q.defer();
-  fs.remove(CONFIG.OUTPUT_DIR,function(){
-    return deferred.resolve(opts);
-  });
-  return deferred.promise;
-};
 
 var createTempDir = function(opts){
   var deferred = Q.defer();
@@ -78,19 +54,7 @@ var copyGeneratedFiles = function(opts){
 };
 
 
-cleanup({})
-  .then(createTempDir)
-
-  .then(forceBaseAliases.run)
-  .then(forceBaseBackgrounds.run)
-  .then(forceBaseText.run)
-  .then(forceBaseBorder.run)
-  .then(forceBaseButton.run)
-  .then(forceBaseInput.run)
-  .then(forceBaseMessaging.run)
-  .then(forceBaseSpacing.run)
-  .then(forceBaseSizing.run)
-  .then(forceBaseLineHeight.run)
+createTempDir({})
 
   //ICONS BUILD
   .then(iconsUtility.run)
@@ -101,8 +65,6 @@ cleanup({})
   .then(iconsLabelsCustom.run)
   .then(iconsStandard.run)
   .then(iconsLabelsStandard.run)
-
-  .then(fonts.run)
 
   .then(copyGeneratedFiles)
   .then(function(opts){

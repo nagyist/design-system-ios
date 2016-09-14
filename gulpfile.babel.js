@@ -6,12 +6,56 @@
  Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#import <Foundation/Foundation.h>
 
-#import "SLDSIconStandard.h"
+import gulp from 'gulp';
+import del from 'del';
+import path from 'path';
+import fs from 'fs';
+import format from 'gulp-json-format';
+import runSequence from 'run-sequence';
+import diff from 'gulp-diff';
+import mkdirp from 'mkdirp';
+import { __PATHS__ } from './scripts/util.js';
 
-@interface SLDSIconLabelStandard : NSObject
+import './scripts/aliases';
+import './scripts/background';
+import './scripts/border';
+import './scripts/button';
+import './scripts/generate-fonts';
+import './scripts/input';
+import './scripts/lineHeight';
+import './scripts/messaging';
+import './scripts/sizing';
+import './scripts/spacing';
+import './scripts/text';
+import './scripts/fonts';
 
-+ (NSString *)sldsIconName:(SLDSIconStandardType)icon;
+gulp.task('clean', () => { 
+	return del.bind(null, [
+	  __PATHS__.generated,
+	  __PATHS__.temp
+	])
+});
 
-@end
+gulp.task('create:temp', () => {
+	mkdirp(__PATHS__.temp);
+});
+
+gulp.task('move:generatedFiles', () => {
+  return gulp.src(__PATHS__.generated)
+    .pipe(gulp.dest(__PATHS__.temp));
+});
+
+gulp.task('remove:temp', del.bind(null, [
+  __PATHS__.temp
+]));
+
+gulp.task('default', (callback) => {
+	runSequence('clean', 'create:temp', 'generate:fonts', 'move:generatedFiles', 'aliases', 'background', 'border', 'button', 'fonts', 'input', 'line-height', 'messaging', 'sizing', 'spacing', 'text', 'remove:temp', callback);
+});
+ 
+gulp.task('diff', () => {
+  return gulp.src(['./temp/**/*'])
+    .pipe(diff('./SalesforceDesignSystem/Generated/'))
+    .pipe(diff.reporter({ fail: false }));
+});
